@@ -7,6 +7,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $nom = $_POST["nom"];
     $password = $_POST["password"];
     $confirmPassword = $_POST["confirmPassword"];
+    $phone = $_POST["phone"];
+    $postal = $_POST["postal"];
+    $ville = $_POST["ville"];
     
     // Vérifier si les mots de passe correspondent
     if ($password === $confirmPassword) {
@@ -21,9 +24,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             
             // Insérer les données dans la table utilisateurs
-            $query = "INSERT INTO utilisateurs (login, prenom, nom, password) VALUES (?, ?, ?, ?)";
+            $query = "INSERT INTO utilisateurs (login, prenom, nom, password, phone, postal, ville) VALUES (?, ?, ?, ?, ?, ?, ?)";
             $stmt = $conn->prepare($query);
-            $stmt->execute([$login, $prenom, $nom, $password]);
+            $stmt->execute([$login, $prenom, $nom, $password, $phone, $postal, $ville]);
             
             // Redirection vers la page de connexion
             header("Location: connexion.php");
@@ -57,7 +60,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         
         <label for="nom" style="font-size: 0.5em">Nom:</label>
         <input type="text" id="nom" name="nom" required><br>
-        
+
+        <label for="phone" style="font-size: 0.5em">Télephone:</label>
+        <input type="tel" id="phone" name="phone" required><br>
+
+        <label for="postal" style="font-size: 0.5em">Code postal:</label>
+        <input type="text" id="postal" name="postal" required><br>
+
+        <label for="ville" style="font-size: 0.5em">Ville:</label>
+        <input type="text" id="ville" name="ville" required><br>
+
         <label for="password" style="font-size: 0.5em">Mot de passe:</label>
         <input type="password" id="password" name="password" required><br>
         
