@@ -123,7 +123,7 @@ if (isset($_GET["logout"])) {
             <?php //echo '<img src="upload/'.$row["photo"].'" width="128" height="117"> </img>' ?>
             <?php
 
-?>
+    ?>
 
     <img src=upload/<?=$row['photo']?> height="430">
 
@@ -143,5 +143,12 @@ if (isset($_GET["logout"])) {
         <input type="hidden" name="logout" value="true">
         <input type="submit" value="Se déconnecter">
     </form>
+
+      <!-- Bouton pour créer un nouveau CV -->
+      <a href="nouveaucv.php">Créer un nouveau CV</a>
+
+    <!-- Bouton pour voir un CV enregistré -->
+    <a href="voircv.php">Voir un CV enregistré</a>
+
 </body>
 </html>
