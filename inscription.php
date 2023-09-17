@@ -44,39 +44,51 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <html>
 <head>
     <title>Inscription</title>
-    <link id="style" rel="stylesheet" type="text/css" href="style6.css">
+    <link id="style" rel="stylesheet" type="text/css" href="style.css">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Bruno+Ace+SC&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Assistant&display=swap');
   </style>
 </head>
 <body>
 <form method="POST" action="<?php echo $_SERVER["PHP_SELF"]; ?>">
         <h1>Inscription</h1>
-        <label for="login" style="font-size: 0.5em">Login:</label>
-        <input type="text" id="login" name="login" required><br>
-        
-        <label for="prenom" style="font-size: 0.5em">Prénom:</label>
-        <input type="text" id="prenom" name="prenom" required><br>
-        
-        <label for="nom" style="font-size: 0.5em">Nom:</label>
-        <input type="text" id="nom" name="nom" required><br>
 
-        <label for="phone" style="font-size: 0.5em">Télephone:</label>
-        <input type="tel" id="phone" name="phone" required><br>
+        <div  class="login-box">
+            <div class="user-box">
+                <input type="text" id="login" name="login" required>
+                <label for="login">Login</label>
+            </div>
+            <div class="user-box">
+                <input type="text" id="prenom" name="prenom" required>
+                <label for="prenom">Prénom</label>
+            </div>
+            <div class="user-box">
+                <input type="text" id="nom" name="nom" required>
+                <label for="nom">Nom</label>
+            </div>
+            <div class="user-box">
+                <input type="tel" id="phone" name="phone" required>
+                <label for="phone">Télephone</label>
+            </div>
+            <div class="user-box">
+                <input type="text" id="postal" name="postal" required>
+                <label for="postal">Code postal</label>
+            </div>
+            <div class="user-box">
+                <input type="text" id="ville" name="ville" required>
+                <label for="ville">Ville</label>
+            </div>
+            <div class="user-box">
+                <input type="password" id="password" name="password" required>
+                <label for="password">Mot de passe</label>
+            </div>
+            <div class="user-box">
+                <input type="password" id="confirmPassword" name="confirmPassword" required>
+                <label for="confirmPassword">Confirmer le mot de passe</label>
+            </div>
+        </div>
 
-        <label for="postal" style="font-size: 0.5em">Code postal:</label>
-        <input type="text" id="postal" name="postal" required><br>
-
-        <label for="ville" style="font-size: 0.5em">Ville:</label>
-        <input type="text" id="ville" name="ville" required><br>
-
-        <label for="password" style="font-size: 0.5em">Mot de passe:</label>
-        <input type="password" id="password" name="password" required><br>
-        
-        <label for="confirmPassword" style="font-size: 0.5em">Confirmer le mot de passe:</label>
-        <input type="password" id="confirmPassword" name="confirmPassword" required><br>
-        
-        <input type="submit" value="S'inscrire">
+        <button class="button"><input type="submit" value="S'inscrire"></button>
     </form>
 </body>
 </html>

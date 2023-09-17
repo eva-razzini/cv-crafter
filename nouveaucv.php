@@ -35,7 +35,10 @@ try {
 <html>
 <head>
     <title>Nouveau CV</title>
-    <!-- Vos balises meta, styles, etc. -->
+    <link id="style" rel="stylesheet" type="text/css" href="style.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Assistant&display=swap');
+  </style>
 </head>
 <body>
     <h1>Nouveau CV</h1>
