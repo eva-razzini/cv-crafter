@@ -89,7 +89,7 @@ if (isset($_GET["logout"])) {
 <html>
 <head>
     <title>Profil</title>
-    <link id="style" rel="stylesheet" type="text/css" href="style.css">
+  <link id="style" rel="stylesheet" type="text/css" href="style.css">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Assistant&display=swap');
   </style>
@@ -98,22 +98,22 @@ if (isset($_GET["logout"])) {
     <form method="POST" action="<?php echo $_SERVER["PHP_SELF"]; ?>" enctype="multipart/form-data">
         <h1>Profil</h1>
         <!-- Display the user's current login and other fields here -->
-        <label for="login" style="font-size: 0.5em">Login:</label>
+        <label for="login">Login:</label>
         <input type="text" id="login" name="login" value="<?php echo $row["login"]; ?>" required><br>
 
-        <label for="prenom" style="font-size: 0.5em">Prénom:</label>
+        <label for="prenom">Prénom:</label>
         <input type="text" id="prenom" name="prenom" value="<?php echo $row["prenom"]; ?>" required><br>
 
-        <label for="nom" style="font-size: 0.5em">Nom:</label>
+        <label for="nom">Nom:</label>
         <input type="text" id="nom" name="nom" value="<?php echo $row["nom"]; ?>" required><br>
 
-        <label for="phone" style="font-size: 0.5em">Numéro de téléphone:</label>
+        <label for="phone">Numéro de téléphone:</label>
         <input type="tel" id="phone" name="phone" value="<?php echo $row["phone"]; ?>" required><br>
 
-        <label for="postal" style="font-size: 0.5em">Code postal:</label>
+        <label for="postal">Code postal:</label>
         <input type="text" id="postal" name="postal" value="<?php echo $row["postal"]; ?>" required><br>
 
-        <label for="ville" style="font-size: 0.5em">Ville:</label>
+        <label for="ville">Ville:</label>
         <input type="text" id="ville" name="ville" value="<?php echo $row["ville"]; ?>" required><br>
 
         <!-- Display the default profile photo -->
@@ -130,10 +130,10 @@ if (isset($_GET["logout"])) {
               <?php //endif; ?>
 
         <!-- Allow the user to upload a new photo -->
-        <label for="fileUpload" style="font-size: 0.5em">Photo de profil:</label>
+        <label for="fileUpload">Photo de profil:</label>
         <input type="file" id="fileUpload" name="photo" required><br>
 
-        <label for="password" style="font-size: 0.5em">Nouveau mot de passe:</label>
+        <label for="password">Nouveau mot de passe:</label>
         <input type="text" id="password" name="password"><br>
 
         <input type="submit" value="Enregistrer les modifications">
