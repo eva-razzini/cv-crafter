@@ -23,9 +23,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Vérification si l'utilisateur existe
     if ($result->num_rows == 1) {
+// Récupérer l'ID de l'utilisateur
+           $row = $result->fetch_assoc();
+        
         // Utilisateur trouvé, création des variables de session
         $_SESSION["logged_in"] = true;
-        $_SESSION["login"] = $login;
+        $_SESSION["id"] = $row['id'];
+        $_SESSION["login"] = $row['login'];
 
         if ($login == "admin" AND $password == "admin") {
             // Redirection vers la page d'administration si l'utilisateur est admin
