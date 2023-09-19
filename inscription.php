@@ -5,6 +5,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $login = $_POST["login"];
     $prenom = $_POST["prenom"];
     $nom = $_POST["nom"];
+    $mail = $_POST["mail"];
     $password = $_POST["password"];
     $confirmPassword = $_POST["confirmPassword"];
     $phone = $_POST["phone"];
@@ -24,9 +25,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             
             // Insérer les données dans la table utilisateurs
-            $query = "INSERT INTO utilisateurs (login, prenom, nom, password, phone, postal, ville) VALUES (?, ?, ?, ?, ?, ?, ?)";
+            $query = "INSERT INTO utilisateurs (login, prenom, nom, mail, password, phone, postal, ville) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
             $stmt = $conn->prepare($query);
-            $stmt->execute([$login, $prenom, $nom, $password, $phone, $postal, $ville]);
+            $stmt->execute([$login, $prenom, $nom, $mail, $password, $phone, $postal, $ville]);
             
             // Redirection vers la page de connexion
             header("Location: connexion.php");
@@ -65,6 +66,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <div class="user-box">
                 <input type="text" id="nom" name="nom" required>
                 <label for="nom">Nom</label>
+            </div>
+            <div class="user-box">
+                <input type="text" id="mail" name="mail" required>
+                <label for="mail">Mail</label>
             </div>
             <div class="user-box">
                 <input type="tel" id="phone" name="phone" required>

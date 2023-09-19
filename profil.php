@@ -13,7 +13,7 @@ try {
     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
     // Récupérer les informations de l'utilisateur connecté
-    $query = "SELECT login, prenom, nom, password, phone, postal, ville, photo FROM utilisateurs WHERE login = ?";
+    $query = "SELECT login, prenom, nom, mail, password, phone, postal, ville, photo FROM utilisateurs WHERE login = ?";
     $stmt = $conn->prepare($query);
     $stmt->execute([$_SESSION["login"]]);
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -27,7 +27,7 @@ try {
         if (isset($_POST["ajouter_langue"])) {
             // Récupérez les données du formulaire de langue
             $nom_langue = $_POST["nom_langue"];
-            $niveau_langue = $_POST["niveau_langue"];
+            $niveau_langue = $_POST["niveau_langue"]; // Récupérez la valeur sélectionnée
     
             // Insérez les données dans la table "langue"
             $insertQuery = "INSERT INTO langue (utilisateurs_id, nom, niveau) VALUES (?, ?, ?)";
@@ -38,9 +38,7 @@ try {
             header("Location: profil.php");
             exit;
         }
-    
-        // ...
-    }
+        }
     
 
     // expérience
@@ -93,7 +91,7 @@ try {
             if (isset($_POST["ajouter_competence"])) {
                 // Récupérez les données du formulaire de compétence
                 $nom_competence = $_POST["nom_competence"];
-                $niveau_competence = $_POST["niveau_competence"];
+                $niveau_competence = $_POST["niveau_competence"]; // Récupérez la valeur sélectionnée
         
                 // Insérez les données dans la table "competence"
                 $insertQuery = "INSERT INTO competence (utilisateurs_id, nom, niveau) VALUES (?, ?, ?)";
@@ -105,6 +103,7 @@ try {
                 exit;
             }
         }
+
         
         //Interet
 
@@ -126,11 +125,12 @@ try {
         
         // utilisateur
         
-        else {
+        if (isset($_POST["enregistrer_modifications"])) {
             // Récupérer les nouvelles données du formulaire de profil
         $newLogin = $_POST["login"];
         $newPrenom = $_POST["prenom"];
         $newNom = $_POST["nom"];
+        $newMail = $_POST["mail"];
         $newphone = $_POST["phone"];
         $newpostal = $_POST["postal"];
         $newville = $_POST["ville"];
@@ -160,9 +160,9 @@ try {
             }
 
                     // Mettre à jour les informations de l'utilisateur
-            $updateQuery = "UPDATE utilisateurs SET login = ?, prenom = ?, nom = ?, phone = ?, postal = ?, ville = ?, password = ? WHERE login = ?";
+            $updateQuery = "UPDATE utilisateurs SET login = ?, prenom = ?, nom = ?, mail = ?, phone = ?, postal = ?, ville = ?, password = ? WHERE login = ?";
             $updateStmt = $conn->prepare($updateQuery);
-            $updateStmt->execute([$newLogin, $newPrenom, $newNom, $newphone, $newpostal, $newville, $hashedPassword, $_SESSION["login"]]);
+            $updateStmt->execute([$newLogin, $newPrenom, $newNom, $newMail, $newphone, $newpostal, $newville, $hashedPassword, $_SESSION["login"]]);
 
             // Vérifier si un nouveau fichier image a été téléchargé
             if ($_FILES["photo"]["error"] === UPLOAD_ERR_OK) {
@@ -170,9 +170,9 @@ try {
                 // Vous pouvez ajouter votre logique de validation d'image ici
 
 // Mettre à jour la photo de profil
-                $updateQuery = "UPDATE utilisateurs SET login = ?, prenom = ?, nom = ?, phone = ?, postal = ?, ville = ?, photo = ? WHERE login = ?";
+                $updateQuery = "UPDATE utilisateurs SET login = ?, prenom = ?, nom = ?, mail = ?, phone = ?, postal = ?, ville = ?, photo = ? WHERE login = ?";
                 $updateStmt = $conn->prepare($updateQuery);
-                $updateStmt->execute([$newLogin, $newPrenom, $newNom, $newphone, $newpostal, $newville, $_FILES["photo"]["name"], $_SESSION["login"]]);
+                $updateStmt->execute([$newLogin, $newPrenom, $newNom, $newMail, $newphone, $newpostal, $newville, $_FILES["photo"]["name"], $_SESSION["login"]]);
         
 // Déplacer le fichier téléchargé
                     move_uploaded_file($_FILES["photo"]["tmp_name"], "upload/" . $_FILES["photo"]["name"]);
@@ -197,7 +197,7 @@ if (isset($_GET["logout"])) {
     session_destroy();
 
     // Redirection vers la page de connexion
-    header("Location: connexion.php");
+    header("Location: index.php");
     exit;
 }
 ?>
@@ -206,12 +206,14 @@ if (isset($_GET["logout"])) {
 <html>
 <head>
     <title>Profil</title>
-  <link id="style" rel="stylesheet" type="text/css" href="style.css">
+  <link id="style" rel="stylesheet" type="text/css" href="styleprof.css">
+  <script defer src="script.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Assistant&display=swap');
   </style>
 </head>
 <body class="bodyprof">
+    <section class="modif">
     <form method="POST" action="<?php echo $_SERVER["PHP_SELF"]; ?>" enctype="multipart/form-data">
         <h1>Profil</h1>
         <!-- Display the user's current login and other fields here -->
@@ -223,6 +225,9 @@ if (isset($_GET["logout"])) {
 
         <label for="nom">Nom:</label>
         <input type="text" id="nom" name="nom" value="<?php echo $row["nom"]; ?>" required><br>
+
+        <label for="mail">Mail:</label>
+        <input type="text" id="mail" name="mail" value="<?php echo $row["mail"]; ?>" required><br>
 
         <label for="phone">Numéro de téléphone:</label>
         <input type="tel" id="phone" name="phone" value="<?php echo $row["phone"]; ?>" required><br>
@@ -249,11 +254,11 @@ if (isset($_GET["logout"])) {
 
         <br>
         
-        <img src=upload/<?=$row['photo']?> height="200">
+        <img src=upload/<?=$row['photo']?> height="100" >
 
         <br>
 
-        <input type="submit" value="Enregistrer les modifications">
+        <button class="button"><input type="submit" name="enregistrer_modifications" value="Enregistrer les modifications"></button>
     </form>
 
         <!-- expérience -->
@@ -277,27 +282,8 @@ if (isset($_GET["logout"])) {
             <label for="description_experience">Description:</label>
             <textarea id="description_experience" name="description_experience" rows="4" required></textarea><br>
 
-            <input type="submit" name="ajouter_experience" value="Ajouter l'expérience">
+            <button class="button"><input type="submit" name="ajouter_experience" value="Ajouter l'expérience"></button>
         </form>
-        
-        <h2>Expériences</h2>
-        <ul>
-            <?php
-            // Sélectionnez les expériences de l'utilisateur connecté depuis la base de données
-            $experiencesQuery = "SELECT poste, employeur, ville, date_start, date_end, description FROM experience WHERE utilisateurs_id = ?";
-            $experiencesStmt = $conn->prepare($experiencesQuery);
-            $experiencesStmt->execute([$_SESSION["id"]]);
-            $experiences = $experiencesStmt->fetchAll(PDO::FETCH_ASSOC);
-
-            foreach ($experiences as $experience) {
-                echo "<li><strong>" . $experience["poste"] . "</strong> chez " . $experience["employeur"] . "<br>";
-                echo "Ville : " . $experience["ville"] . "<br>";
-                echo "Date de début : " . $experience["date_start"] . "<br>";
-                echo "Date de fin : " . $experience["date_end"] . "<br>";
-                echo "Description : " . $experience["description"] . "</li><br>";
-            }
-            ?>
-        </ul>
 
         <!-- Formation -->
         <h2 id="formation-link">Ajouter une formation +</h2>
@@ -320,10 +306,86 @@ if (isset($_GET["logout"])) {
             <label for="description_formation">Description:</label>
             <textarea id="description_formation" name="description_formation" rows="4" required></textarea><br>
 
-            <input type="submit" name="ajouter_formation" value="Ajouter la formation">
+            <button class="button"><input type="submit" name="ajouter_formation" value="Ajouter la formation"></button>
         </form>
 
-        <h2>Formations</h2>
+        <!-- Competence -->
+
+        <h2 id="competence-link">Ajouter une compétence +</h2>
+        <form id="competence-form" style="display: none;" method="POST" action="<?php echo $_SERVER["PHP_SELF"]; ?>">
+            <label for="nom_competence">Nom de la compétence:</label>
+            <input type="text" id="nom_competence" name="nom_competence" required><br>
+
+            <label for="niveau_competence">Niveau de la compétence:</label>
+            <select id="niveau_competence" name="niveau_competence" required>
+                <option value="Débutant">Débutant</option>
+                <option value="Intermédiaire">Intermédiaire</option>
+                <option value="Avancé">Avancé</option>
+                <option value="Expert">Expert</option>
+            </select><br>
+
+            <button class="button"><input type="submit" name="ajouter_competence" value="Ajouter la compétence"></button>
+        </form>
+
+        <!-- Interet -->
+
+        <h2 id="interet-link">Ajouter un intérêt +</h2>
+        <form id="interet-form" style="display: none;" method="POST" action="<?php echo $_SERVER["PHP_SELF"]; ?>">
+            <label for="nom_interet">Nom de l'intérêt :</label>
+            <input type="text" id="nom_interet" name="nom_interet" required><br>
+
+            <button class="button"><input type="submit" name="ajouter_interet" value="Ajouter l'intérêt"></button>
+        </form>
+        <!-- Langue -->
+
+        <h2 id="langue-link">Ajouter une langue +</h2>
+        <form id="langue-form" style="display: none;" method="POST" action="<?php echo $_SERVER["PHP_SELF"]; ?>">
+            <label for="nom_langue">Langue:</label>
+            <input type="text" id="nom_langue" name="nom_langue" required><br>
+
+            <label for="niveau_langue">Niveau de la langue:</label>
+            <select id="niveau_langue" name="niveau_langue" required>
+                <option value="Débutant">A0 : Débutant</option>
+                <option value="Elémentaire">A1 : Elémentaire</option>
+                <option value="Pré-intermédiaire">A2 : Pré-intermédiaire</option>
+                <option value="Intermédiaire">B1 : Intermédiaire</option>
+                <option value="Intermédiaire supérieur">B2 : Intermédiaire supérieur</option>
+                <option value="Avancé">C1 : Avancé</option>
+                <option value="Courant">C2 : Courant</option>
+            </select><br>
+
+            <button class="button"><input type="submit" name="ajouter_langue" value="Ajouter la langue"></button>
+        </form>
+        <br>
+    <form method="GET" action="<?php echo $_SERVER["PHP_SELF"]; ?>">
+        <input type="hidden" name="logout" value="true">
+        <button class="button"><input type="submit" value="Se déconnecter"></button>
+    </form>           
+    </section>
+    <section class="view">
+        <p><?php echo $row["prenom"]; ?> <?php echo $row["nom"]; ?></p>
+        <p><?php echo $row["mail"]; ?></p>
+     
+        <h3>Expériences</h3>
+        <ul>
+            <?php
+            // Sélectionnez les expériences de l'utilisateur connecté depuis la base de données
+            $experiencesQuery = "SELECT id, poste, employeur, ville, date_start, date_end, description FROM experience WHERE utilisateurs_id = ?";
+            $experiencesStmt = $conn->prepare($experiencesQuery);
+            $experiencesStmt->execute([$_SESSION["id"]]);
+            $experiences = $experiencesStmt->fetchAll(PDO::FETCH_ASSOC);
+
+            foreach ($experiences as $experience) {
+                echo "<li><strong>" . $experience["poste"] . "</strong> chez " . $experience["employeur"] . "<br>";
+                echo "Ville : " . $experience["ville"] . "<br>";
+                echo "Date de début : " . $experience["date_start"] . "<br>";
+                echo "Date de fin : " . $experience["date_end"] . "<br>";
+                echo "Description : " . $experience["description"] . "<br>";
+            }
+            ?>
+        </ul>
+
+        <h3>Formations</h3>
         <ul>
             <?php
             // Sélectionnez les formations de l'utilisateur connecté depuis la base de données
@@ -342,20 +404,7 @@ if (isset($_GET["logout"])) {
             ?>
         </ul>
 
-        <!-- Competence -->
-
-        <h2 id="competence-link">Ajouter une compétence +</h2>
-        <form id="competence-form" style="display: none;" method="POST" action="<?php echo $_SERVER["PHP_SELF"]; ?>">
-            <label for="nom_competence">Nom de la compétence:</label>
-            <input type="text" id="nom_competence" name="nom_competence" required><br>
-
-            <label for="niveau_competence">Niveau de la compétence:</label>
-            <input type="text" id="niveau_competence" name="niveau_competence" required><br>
-
-            <input type="submit" name="ajouter_competence" value="Ajouter la compétence">
-        </form>
-
-        <h2>Compétences</h2>
+        <h3>Compétences</h3>
         <ul>
             <?php
             // Sélectionnez les compétences de l'utilisateur connecté depuis la base de données
@@ -370,18 +419,7 @@ if (isset($_GET["logout"])) {
             ?>
         </ul>
 
-        <!-- Interet -->
-
-        <h2 id="interet-link">Ajouter un intérêt +</h2>
-        <form id="interet-form" style="display: none;" method="POST" action="<?php echo $_SERVER["PHP_SELF"]; ?>">
-            <label for="nom_interet">Nom de l'intérêt :</label>
-            <input type="text" id="nom_interet" name="nom_interet" required><br>
-
-            <input type="submit" name="ajouter_interet" value="Ajouter l'intérêt">
-        </form>
-
-
-        <h2>Intérêts</h2>
+        <h3>Intérêts</h3>
         <ul>
             <?php
             // Sélectionnez les intérêts de l'utilisateur connecté depuis la base de données
@@ -396,20 +434,9 @@ if (isset($_GET["logout"])) {
             ?>
         </ul>
 
-        <!-- Langue -->
 
-        <h2 id="langue-link">Ajouter une langue +</h2>
-        <form id="langue-form" style="display: none;" method="POST" action="<?php echo $_SERVER["PHP_SELF"]; ?>">
-            <label for="nom_langue">Langue:</label>
-            <input type="text" id="nom_langue" name="nom_langue" required><br>
 
-            <label for="niveau_langue">Niveau de la langue:</label>
-            <input type="text" id="niveau_langue" name="niveau_langue" required><br>
-
-            <input type="submit" name="ajouter_langue" value="Ajouter la langue">
-        </form>
-
-        <h2>Langues</h2>
+        <h3>Langues</h3>
         
         <ul>
             <?php
@@ -427,83 +454,20 @@ if (isset($_GET["logout"])) {
 
 
     <br>
-    
-      <!-- Bouton pour créer un nouveau CV -->
-      <a href="nouveaucv.php">Créer un nouveau CV</a>
 
-    <!-- Bouton pour voir un CV enregistré -->
-    <a href="voircv.php">Voir un CV enregistré</a>
 
-    <form method="GET" action="<?php echo $_SERVER["PHP_SELF"]; ?>">
-        <input type="hidden" name="logout" value="true">
-        <input type="submit" value="Se déconnecter">
-    </form>
-
-    <form method="POST" action="pdf_generator.php">
-    <!-- Ajoutez des champs pour les informations de l'utilisateur ici -->
-    <!-- ... -->
-
-        <input type="submit" value="Générer et Télécharger le CV en PDF">
-    </form>
 
     <script>
-        // JavaScript pour afficher/masquer les formulaires associés aux liens
-        const experienceLink = document.getElementById('experience-link');
-        const experienceForm = document.getElementById('experience-form');
-
-        experienceLink.addEventListener('click', () => {
-            if (experienceForm.style.display === 'none' || experienceForm.style.display === '') {
-                experienceForm.style.display = 'block';
-            } else {
-                experienceForm.style.display = 'none';
-            }
-        });
-
-        const formationLink = document.getElementById('formation-link');
-        const formationForm = document.getElementById('formation-form');
-
-        formationLink.addEventListener('click', () => {
-            if (formationForm.style.display === 'none' || formationForm.style.display === '') {
-                formationForm.style.display = 'block';
-            } else {
-                formationForm.style.display = 'none';
-            }
-        });
-
-        const competenceLink = document.getElementById('competence-link');
-        const formationForm = document.getElementById('competence-form');
-
-        competenceLink.addEventListener('click', () => {
-            if (competenceForm.style.display === 'none' || competenceForm.style.display === '') {
-                competenceForm.style.display = 'block';
-            } else {
-                competenceForm.style.display = 'none';
-            }
-        });
-
-        const interetLink = document.getElementById('interet-link');
-        const interetForm = document.getElementById('interet-form');
-
-        interetLink.addEventListener('click', () => {
-            if (interetForm.style.display === 'none' || interetForm.style.display === '') {
-                interetForm.style.display = 'block';
-            } else {
-                interetForm.style.display = 'none';
-            }
-        });
-
-        const langueLink = document.getElementById('langue-link');
-        const langueForm = document.getElementById('langue-form');
-
-        langueLink.addEventListener('click', () => {
-            if (langueForm.style.display === 'none' || langueForm.style.display === '') {
-                langueForm.style.display = 'block';
-            } else {
-                langueForm.style.display = 'none';
-            }
-        });
-    </script>
-
+function toggleUpdateForm(experienceId) {
+    var formId = "updateForm" + experienceId;
+    var form = document.getElementById(formId);
+    if (form.style.display === "none" || form.style.display === "") {
+        form.style.display = "block";
+    } else {
+        form.style.display = "none";
+    }
+}
+</script>
 
 </body>
 </html>
