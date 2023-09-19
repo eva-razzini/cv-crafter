@@ -363,8 +363,11 @@ if (isset($_GET["logout"])) {
     </form>           
     </section>
     <section class="view">
-        <p><?php echo $row["prenom"]; ?> <?php echo $row["nom"]; ?></p>
+        <p><img src=upload/<?=$row['photo']?> height="100" ></p>
+        <h1 class="name"><?php echo $row["prenom"]; ?> <?php echo $row["nom"]; ?></h1>
         <p><?php echo $row["mail"]; ?></p>
+        <p><?php echo $row["ville"]; ?></p>
+        <p><?php echo $row["phone"]; ?></p>
      
         <h3>Expériences</h3>
         <ul>
