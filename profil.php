@@ -164,6 +164,20 @@ try {
             $updateStmt = $conn->prepare($updateQuery);
             $updateStmt->execute([$newLogin, $newPrenom, $newNom, $newMail, $newphone, $newpostal, $newville, $hashedPassword, $_SESSION["login"]]);
 
+                   // Vérifie si le fichier a été uploadé sans erreur.
+            $allowed = array("jpg" => "image/jpg", "jpeg" => "image/jpeg", "gif" => "image/gif", "png" => "image/png");
+            $filename = $_FILES["photo"]["name"];
+            $filetype = $_FILES["photo"]["type"];
+            $filesize = $_FILES["photo"]["size"];
+
+            // Vérifie l'extension du fichier
+            $ext = pathinfo($filename, PATHINFO_EXTENSION);
+            if (!array_key_exists($ext, $allowed)) die("Erreur : Veuillez sélectionner un format de fichier valide.");
+
+            // Vérifie la taille du fichier - 5Mo maximum
+            $maxsize = 5 * 1024 * 1024;
+            if ($filesize > $maxsize) die("Error: La taille du fichier est supérieure à la limite autorisée.");
+
             // Vérifier si un nouveau fichier image a été téléchargé
             if ($_FILES["photo"]["error"] === UPLOAD_ERR_OK) {
                 // Un nouveau fichier image a été téléchargé
