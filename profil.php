@@ -16,7 +16,9 @@ try {
     $query = "SELECT login, prenom, nom, mail, password, phone, postal, ville, photo FROM utilisateurs WHERE login = ?";
     $stmt = $conn->prepare($query);
     $stmt->execute([$_SESSION["login"]]);
-    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    $row = $stmt->fetch();
+
+
 
 // langue
 
@@ -38,7 +40,7 @@ try {
             header("Location: profil.php");
             exit;
         }
-        }
+}
     
 
     // expérience
@@ -57,8 +59,6 @@ try {
             $insertQuery = "INSERT INTO experience (utilisateurs_id, poste, employeur, ville, date_start, date_end, description) VALUES (?, ?, ?, ?, ?, ?, ?)";
             $insertStmt = $conn->prepare($insertQuery);
             $insertStmt->execute([$_SESSION["id"], $poste, $employeur, $ville_experience, $date_start_experience, $date_end_experience, $description_experience]);
-
-            var_dump($_SESSION["id"]);
 
             // Redirigez l'utilisateur vers la page "profil.php" après l'ajout
             header("Location: profil.php");
@@ -92,12 +92,12 @@ try {
                 // Récupérez les données du formulaire de compétence
                 $nom_competence = $_POST["nom_competence"];
                 $niveau_competence = $_POST["niveau_competence"]; // Récupérez la valeur sélectionnée
-        
+            
                 // Insérez les données dans la table "competence"
                 $insertQuery = "INSERT INTO competence (utilisateurs_id, nom, niveau) VALUES (?, ?, ?)";
                 $insertStmt = $conn->prepare($insertQuery);
                 $insertStmt->execute([$_SESSION["id"], $nom_competence, $niveau_competence]);
-        
+            
                 // Redirigez l'utilisateur vers la page "profil.php" après l'ajout
                 header("Location: profil.php");
                 exit;
@@ -111,16 +111,16 @@ try {
             if (isset($_POST["ajouter_interet"])) {
                 // Récupérez les données du formulaire d'intérêt
                 $nom_interet = $_POST["nom_interet"];
-        
+            
                 // Insérez les données dans la table "interet"
                 $insertQuery = "INSERT INTO interet (utilisateurs_id, nom) VALUES (?, ?)";
                 $insertStmt = $conn->prepare($insertQuery);
                 $insertStmt->execute([$_SESSION["id"], $nom_interet]);
-        
+            
                 // Redirigez l'utilisateur vers la page "profil.php" après l'ajout
                 header("Location: profil.php");
                 exit;
-            }
+            }        
         }        
         
         // utilisateur
@@ -205,8 +205,16 @@ if (isset($_GET["logout"])) {
 <!DOCTYPE html>
 <html>
 <head>
+<meta charset="utf-8">
     <title>Profil</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css" 
+    integrity="sha512-5A8nwdMOWrSz20fDsjczgUidUBR8liPYU+WymTZP1lmY9G6Oc7HlZv156XqnsgNUzTyMefFTcsFH/tnJE/+xBg==" 
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
   <link id="style" rel="stylesheet" type="text/css" href="styleprof.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
   <script defer src="script.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Assistant&display=swap');
@@ -240,7 +248,7 @@ if (isset($_GET["logout"])) {
 
         <!-- Affichage du champ de modification du mot de passe -->
         <label for="password">Nouveau mot de passe:</label>
-        <input type="password" id="password" name="password" value="<?php echo isset($_POST['password']) ? $_POST['password'] : ''; ?>" placeholder="Laissez vide pour conserver le mot de passe actuel">
+        <input type="password" id="password" name="password" value="<?php echo isset($_POST['password']) ? $_POST['password'] : ''; ?>" placeholder="Laissez vide pour conserver le mot de passe actuel"><br>
 
     <label for="confirmPassword">Confirmez le nouveau mot de passe:</label>
         <input type="password" id="confirmPassword" name="confirmPassword" value="<?php echo isset($_POST['confirmPassword']) ? $_POST['confirmPassword'] : ''; ?>" placeholder="Laissez vide pour conserver le mot de passe actuel">
@@ -361,16 +369,97 @@ if (isset($_GET["logout"])) {
         <input type="hidden" name="logout" value="true">
         <button class="button"><input type="submit" value="Se déconnecter"></button>
     </form>           
-    </section>
-    <section class="view">
-        <p><img src=upload/<?=$row['photo']?> height="100" ></p>
-        <h1 class="name"><?php echo $row["prenom"]; ?> <?php echo $row["nom"]; ?></h1>
-        <p><?php echo $row["mail"]; ?></p>
-        <p><?php echo $row["ville"]; ?></p>
-        <p><?php echo $row["phone"]; ?></p>
-     
-        <h3>Expériences</h3>
+
+    <!-- changement de couleur -->
+
+    <label for="colorPicker">Choisir une couleur pour le fond :</label>
+<input type="color" id="colorPicker">
+
+<label for="iconColorPicker">Choisir une couleur pour les icônes :</label>
+<input type="color" id="iconColorPicker">
+
+<label for="titleColorPicker">Choisir une couleur pour les titres :</label>
+<input type="color" id="titleColorPicker">
+
+<label for="textColorPicker">Choisir une couleur pour le texte :</label>
+<input type="color" id="textColorPicker">          
+    
+
+<input type="button" value="Télécharge ton cv en PDF"			
+				onclick="convertHTMLtoPDF()">     
+</section>
+
+  <!-- CV -->
+
+    <section class="container" id="divID">
+
+        <div class="left_side">
+            <div class="profileText">
+                <div class="imgBx">
+                    <img src=upload/<?=$row['photo']?>>
+                </div>
+                <h2><?php echo $row["prenom"]; ?> <?php echo $row["nom"]; ?></h2>
+            </div>
+
+            <div class="contactInfo">
+                <h3 class="title">Contact</h3>
+                <ul>
+                    <li>
+                        <span class="icon"><i class="fa fa-phone" aria-hidden="true"></i></span>
+                        <span class="text"><?php echo $row["phone"]; ?></span>
+                    </li>
+                    <li>
+                        <span class="icon"><i class="fa fa-envelope-o" aria-hidden="true"></i></span>
+                        <span class="text"><?php echo $row["mail"]; ?></span>
+                    </li>
+                    <li>
+                        <span class="icon"><i class="fa fa-map-marker" aria-hidden="true"></i></span>
+                        <span class="text"><?php echo $row["ville"]; ?></span>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="contactInfo">
+                <h3 class="title">Interet</h3>
+                <ul>
+                    <?php
+                        // Sélectionnez les intérêts de l'utilisateur connecté depuis la base de données
+                        $interetsQuery = "SELECT nom FROM interet WHERE utilisateurs_id = ?";
+                        $interetsStmt = $conn->prepare($interetsQuery);
+                        $interetsStmt->execute([$_SESSION["id"]]);
+                        $interets = $interetsStmt->fetchAll(PDO::FETCH_ASSOC);
+
+                        foreach ($interets as $interet) {
+                            echo "<li>
+                            <span class='icon'><i class='fa fa-star' aria-hidden='true'></i></span>
+                            <span class='text'>" . $interet["nom"] . "</span></li>";
+                        }
+                    ?>
+                </ul>
+            </div>
+
+            <div class="contactInfo language">
+                <h3 class="title">Langues</h3>
         <ul>
+        <?php
+                        // Sélectionnez les langues de l'utilisateur connecté depuis la base de données
+                        $languesQuery = "SELECT nom, niveau FROM langue WHERE utilisateurs_id = ?";
+                        $languesStmt = $conn->prepare($languesQuery);
+                        $languesStmt->execute([$_SESSION["id"]]);
+                        $langues = $languesStmt->fetchAll(PDO::FETCH_ASSOC);
+
+                        foreach ($langues as $langue) {
+                            echo "<li><h4>" . $langue["nom"] . "</h4> 
+                            <h5>(Niveau : " . $langue["niveau"] . ")</h5></li>";
+                        }
+                    ?>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="right_side">
+            <div class="about">
+                <h3 class="title2">Expérience</h3>
             <?php
             // Sélectionnez les expériences de l'utilisateur connecté depuis la base de données
             $experiencesQuery = "SELECT id, poste, employeur, ville, date_start, date_end, description FROM experience WHERE utilisateurs_id = ?";
@@ -379,17 +468,17 @@ if (isset($_GET["logout"])) {
             $experiences = $experiencesStmt->fetchAll(PDO::FETCH_ASSOC);
 
             foreach ($experiences as $experience) {
-                echo "<li><strong>" . $experience["poste"] . "</strong> chez " . $experience["employeur"] . "<br>";
-                echo "Ville : " . $experience["ville"] . "<br>";
-                echo "Date de début : " . $experience["date_start"] . "<br>";
-                echo "Date de fin : " . $experience["date_end"] . "<br>";
-                echo "Description : " . $experience["description"] . "<br>";
+                echo "<div class='box'><div class='year_company'><h5>" . $experience["date_start"] . "/" . $experience["date_end"] . "</h5>
+                        <h5>" . $experience["employeur"] . "</h5>
+                        <h5>". $experience["ville"] ."</h5></div>
+                        <div class='text'><h4 class='text'>" . $experience["poste"] . "</h4>
+                        <p>" . $experience["description"] . "</p></div></div>";
             }
             ?>
-        </ul>
+        </div>
 
-        <h3>Formations</h3>
-        <ul>
+        <div class="about">
+                <h3 class="title2">Formations</h3>
             <?php
             // Sélectionnez les formations de l'utilisateur connecté depuis la base de données
             $formationsQuery = "SELECT nom_formation, nom_etablissement, ville, date_start, date_end, description FROM formation WHERE utilisateurs_id = ?";
@@ -398,17 +487,17 @@ if (isset($_GET["logout"])) {
             $formations = $formationsStmt->fetchAll(PDO::FETCH_ASSOC);
 
             foreach ($formations as $formation) {
-                echo "<li><strong>" . $formation["nom_formation"] . "</strong> à " . $formation["nom_etablissement"] . "<br>";
-                echo "Ville : " . $formation["ville"] . "<br>";
-                echo "Date de début : " . $formation["date_start"] . "<br>";
-                echo "Date de fin : " . $formation["date_end"] . "<br>";
-                echo "Description : " . $formation["description"] . "</li><br>";
+                echo "<div class='box'><div class='year_company'><h5>" . $formation["date_start"] . "/" . $formation["date_end"] . "</h5>
+                        <h5>" . $formation["ville"] . "</h5></div>
+                        <div class='text'><h4 class='text'>" . $formation["nom_formation"] . "</h4>
+                        <h6 class='text'>" . $formation["nom_etablissement"] . "</h6>
+                        <p>" . $formation["description"] . "</p></div></div>";
             }
             ?>
-        </ul>
+        </div>
 
-        <h3>Compétences</h3>
-        <ul>
+        <div class="about skills">
+                <h3 class="title2">Compétences</h3>
             <?php
             // Sélectionnez les compétences de l'utilisateur connecté depuis la base de données
             $competencesQuery = "SELECT nom, niveau FROM competence WHERE utilisateurs_id = ?";
@@ -417,47 +506,13 @@ if (isset($_GET["logout"])) {
             $competences = $competencesStmt->fetchAll(PDO::FETCH_ASSOC);
 
             foreach ($competences as $competence) {
-                echo "<li><strong>" . $competence["nom"] . "</strong> (Niveau : " . $competence["niveau"] . ")</li><br>";
+                echo "<div class='box'><h4 class='text'>" . $competence["nom"] . "</h4>
+                        <p>" . $competence["niveau"] . "</p></div>";
             }
             ?>
-        </ul>
-
-        <h3>Intérêts</h3>
-        <ul>
-            <?php
-            // Sélectionnez les intérêts de l'utilisateur connecté depuis la base de données
-            $interetsQuery = "SELECT nom FROM interet WHERE utilisateurs_id = ?";
-            $interetsStmt = $conn->prepare($interetsQuery);
-            $interetsStmt->execute([$_SESSION["id"]]);
-            $interets = $interetsStmt->fetchAll(PDO::FETCH_ASSOC);
-
-            foreach ($interets as $interet) {
-                echo "<li><strong>" . $interet["nom"] . "</strong></li><br>";
-            }
-            ?>
-        </ul>
-
-
-
-        <h3>Langues</h3>
-        
-        <ul>
-            <?php
-            // Sélectionnez les langues de l'utilisateur connecté depuis la base de données
-            $languesQuery = "SELECT nom, niveau FROM langue WHERE utilisateurs_id = ?";
-            $languesStmt = $conn->prepare($languesQuery);
-            $languesStmt->execute([$_SESSION["id"]]);
-            $langues = $languesStmt->fetchAll(PDO::FETCH_ASSOC);
-
-            foreach ($langues as $langue) {
-                echo "<li><strong>" . $langue["nom"] . "</strong> (Niveau : " . $langue["niveau"] . ")</li><br>";
-            }
-            ?>
-        </ul>
-
-
-    <br>
-
+        </div>
+        </div>
+    </section>
 
 
     <script>
@@ -470,7 +525,84 @@ function toggleUpdateForm(experienceId) {
         form.style.display = "none";
     }
 }
-</script>
+
+// Sélectionnez l'élément input de type "color"
+const colorPicker = document.getElementById("colorPicker");
+
+// Sélectionnez l'élément que vous souhaitez changer de couleur (dans ce cas, left_side)
+const leftSide = document.querySelector(".left_side");
+
+// Ajoutez un écouteur d'événements pour détecter le changement de la couleur
+colorPicker.addEventListener("input", function () {
+    const selectedColor = colorPicker.value;
+    leftSide.style.backgroundColor = selectedColor;
+});
+
+// Sélectionnez l'élément input de type "color" pour les icônes
+const iconColorPicker = document.getElementById("iconColorPicker");
+
+// Sélectionnez tous les éléments avec la classe "icon"
+const icons = document.querySelectorAll(".icon");
+
+// Ajoutez un écouteur d'événements pour détecter le changement de la couleur des icônes
+iconColorPicker.addEventListener("input", function () {
+    const selectedIconColor = iconColorPicker.value;
+    
+    // Parcourez tous les éléments "icon" et mettez à jour leur couleur
+    icons.forEach(function (icon) {
+        icon.style.color = selectedIconColor;
+    });
+});
+
+
+// Sélectionnez l'élément input de type "color" pour les titres "title2"
+const titleColorPicker = document.getElementById("titleColorPicker");
+
+// Sélectionnez tous les éléments avec la classe "title2"
+const title2Elements = document.querySelectorAll(".title2");
+
+// Ajoutez un écouteur d'événements pour détecter le changement de la couleur des titres "title2"
+titleColorPicker.addEventListener("input", function () {
+    const selectedTitleColor = titleColorPicker.value;
+    
+    // Parcourez tous les éléments "title2" et mettez à jour leur couleur
+    title2Elements.forEach(function (title2Element) {
+        title2Element.style.color = selectedTitleColor;
+    });
+});
+
+// Sélectionnez l'élément input de type "color" pour le texte
+const textColorPicker = document.getElementById("textColorPicker");
+
+// Sélectionnez tous les éléments avec la classe "text" à l'intérieur des éléments avec les classes "about", "box", et "text"
+const textElements = document.querySelectorAll(".about .box .text");
+
+// Ajoutez un écouteur d'événements pour détecter le changement de la couleur du texte
+textColorPicker.addEventListener("input", function () {
+    const selectedTextColor = textColorPicker.value;
+    
+    // Parcourez tous les éléments "text" et mettez à jour leur couleur de texte
+    textElements.forEach(function (textElement) {
+        textElement.style.color = selectedTextColor;
+    });
+});     
+    </script>
+    	<script type="text/javascript">
+		function convertHTMLtoPDF() {
+			const { jsPDF } = window.jspdf;
+
+			let doc = new jsPDF('l', 'mm', [1440, 1452]);
+			let pdfjs = document.querySelector('#divID');
+
+			doc.html(pdfjs, {
+				callback: function(doc) {
+					doc.save("newpdf.pdf");
+				},
+				x: 12,
+				y: 12
+			});			
+		}		
+	</script>
 
 </body>
 </html>
